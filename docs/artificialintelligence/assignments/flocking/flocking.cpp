@@ -101,7 +101,29 @@ struct Cohesion {
   Cohesion() = default;
 
   Vector2 ComputeForce(const vector<Boid>& boids, int boidAgentIndex) {
-    return {};
+    Vector2 centerMass = {0,0};
+    int numBoidsInRadius = 0;
+    for (int i = 0; i < boids.size(); ++i)
+    {
+      const double boidDistance = (boids[i].position - boids[boidAgentIndex].position).getMagnitude();
+      if (boidDistance <= radius && i != boidAgentIndex)
+      {
+        centerMass += boids[i].position;
+        numBoidsInRadius++;
+      }
+    }
+
+    centerMass /= numBoidsInRadius;
+    Vector2 agentDirection = centerMass - boids[boidAgentIndex].position;
+    if (agentDirection.getMagnitude() <= radius)
+    {
+      agentDirection /= radius;
+      return agentDirection * k;
+    }
+    else
+    {
+      return {0, 0};
+    }
   }
 };
 
@@ -112,8 +134,23 @@ struct Alignment {
   Alignment() = default;
 
   Vector2 ComputeForce(const vector<Boid>& boids, int boidAgentIndex) {
-    return {};
+    Vector2 avgVelocity = {0,0};
+    int numOfBoidsInRadius = 0;
+    for (int i = 0; i < boids.size(); ++i)
+    {
+      const double boidDistance = (boids[i].position - boids[boidAgentIndex].position).getMagnitude();
+      if (boidDistance <= radius)
+      {
+        avgVelocity += boids[i].velocity;
+        numOfBoidsInRadius++;
+      }
+    }
+
+    avgVelocity /= numOfBoidsInRadius;
+    avgVelocity *= k;
+    return avgVelocity;
   }
+
 };
 
 struct Separation {
@@ -124,7 +161,28 @@ struct Separation {
   Separation() = default;
 
   Vector2 ComputeForce(const vector<Boid>& boids, int boidAgentIndex) {
-    return {};
+    Vector2 seperationForce = {0,0};
+    for (int i = 0; i < boids.size(); ++i)
+    {
+      if (i != boidAgentIndex)
+      {
+        const double boidDistance = (boids[boidAgentIndex].position - boids[i].position).getMagnitude();
+        if(0 < boidDistance && boidDistance <= radius)
+        {
+          Vector2 boidToAgentVector = boids[boidAgentIndex].position - boids[i].position;
+          seperationForce += boidToAgentVector / boidToAgentVector.sqrMagnitude();
+        }
+      }
+    }
+    if (seperationForce.getMagnitude() > maxForce)
+    {
+      return seperationForce.normalized() * maxForce * k;
+    }
+    else
+    {
+      return seperationForce * k;
+    }
+
   }
 };
 
