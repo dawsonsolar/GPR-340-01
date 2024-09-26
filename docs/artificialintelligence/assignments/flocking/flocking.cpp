@@ -207,6 +207,7 @@ int main() {
   }
   // Final input reading and processing
   // todo: edit this. probably my code will be different than yours.
+  getline(cin, line);
   while (getline(cin, line)) { // game loop
     // Use double buffer! you should read from the current and store changes in the new state.
     currentState = newState;
@@ -239,7 +240,7 @@ int main() {
     for (int i = 0; i < numberOfBoids; i++) // for every boid
     {
       newState[i].velocity += allForces[i] * deltaT;
-      newState[i].position += currentState[i].velocity * deltaT;
+      newState[i].position += newState[i].velocity * deltaT;
       cout << newState[i].position.x << " " << newState[i].position.y << " "
            << newState[i].velocity.x << " " << newState[i].velocity.y << endl;
     }
